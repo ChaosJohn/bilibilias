@@ -26,6 +26,21 @@ fun String.copyText(context: Context, title: String) {
     Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
 }
 
+fun Context.consumeClipboardText(): String? {
+    val clipboard =
+        getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            ?: return null
+
+    val clip = clipboard.primaryClip ?: return null
+    val text = clip.getItemAt(0).coerceToText(this)?.toString()?.trim().takeIf {
+        !it.isNullOrEmpty()
+    }
+    if (!text.isNullOrEmpty()) {
+        clipboard.setPrimaryClip(ClipData.newPlainText("", ""))
+    }
+    return text
+}
+
 inline fun analyticsSafe(action: () -> Unit) {
     if (BuildConfig.ENABLED_ANALYTICS && CommonBuildConfig.agreedPrivacyPolicy){
         action()
