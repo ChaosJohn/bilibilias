@@ -2,7 +2,6 @@ package com.imcys.bilibilias
 
 import android.content.Intent
 import android.os.Build
-import android.widget.Toast
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -49,7 +48,6 @@ import com.baidu.mobstat.StatService
 import com.imcys.bilibilias.common.data.CommonBuildConfig
 import com.imcys.bilibilias.common.utils.analyticsSafe
 import com.imcys.bilibilias.common.utils.baiduAnalyticsSafe
-import com.imcys.bilibilias.common.utils.consumeClipboardText
 import com.imcys.bilibilias.ui.weight.ASTextButton
 
 class MainActivity : ComponentActivity() {
@@ -65,9 +63,6 @@ class MainActivity : ComponentActivity() {
 
     private var agreePrivacyPolicyState: AppSettings.AgreePrivacyPolicyState =
         AppSettings.AgreePrivacyPolicyState.Default
-
-    private var shouldCheckClipboardOnFocus = false
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -291,12 +286,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (hasWindowFocus()) {
-            handleClipboardOnForeground()
-            shouldCheckClipboardOnFocus = false
-        } else {
-            shouldCheckClipboardOnFocus = true
-        }
         baiduAnalyticsSafe {
             if (agreePrivacyPolicyState != AppSettings.AgreePrivacyPolicyState.Agreed) return
             StatService.onResume(this)
@@ -308,19 +297,6 @@ class MainActivity : ComponentActivity() {
         baiduAnalyticsSafe {
             if (agreePrivacyPolicyState != AppSettings.AgreePrivacyPolicyState.Agreed) return
             StatService.onPause(this)
-        }
-    }
-
-    private fun handleClipboardOnForeground() {
-        val clipboardText = consumeClipboardText() ?: return
-        Toast.makeText(this, getString(R.string.clipboard_content_toast, clipboardText), Toast.LENGTH_LONG).show()
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus && shouldCheckClipboardOnFocus) {
-            handleClipboardOnForeground()
-            shouldCheckClipboardOnFocus = false
         }
     }
 }

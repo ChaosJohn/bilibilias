@@ -114,7 +114,6 @@
     <string name="home_announcement">公告</string>
     <string name="home_close_announcement">关闭公告</string>
     <string name="home_announcement_close_hint">关闭后将不再显示，直到有新的公告发布</string>
-    <string name="clipboard_content_toast">剪贴板内容：%s</string>
     <!-- Setting screen related strings -->
     <string name="setting_logout">退出登录</string>
     <string name="setting_logout_confirm">是否退出登录？退出登录将清除登录信息，解除登录占用。</string>
