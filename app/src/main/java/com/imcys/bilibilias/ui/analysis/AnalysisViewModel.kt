@@ -468,7 +468,7 @@ class AnalysisViewModel(
         }
     }
 
-    fun createDownloadTask() {
+    fun createDownloadTask(onSuccess: (() -> Unit)? = null) {
         _uiState.value = _uiState.value.copy(isCreateDownloadLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
             if (uiState.value.asLinkResultType != null && uiState.value.downloadInfo != null) {
@@ -503,7 +503,14 @@ class AnalysisViewModel(
 
                 downloadManager.addDownloadTask(
                     uiState.value.asLinkResultType!!,
-                    uiState.value.downloadInfo!!
+                    uiState.value.downloadInfo!!,
+                    onSuccess = {
+                        onSuccess?.let { callback ->
+                            viewModelScope.launch(Dispatchers.Main) {
+                                callback()
+                            }
+                        }
+                    }
                 )
             }
             _uiState.value = _uiState.value.copy(isCreateDownloadLoading = false)

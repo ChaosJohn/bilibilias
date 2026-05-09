@@ -187,7 +187,8 @@ class DownloadManager(
      */
     suspend fun addDownloadTask(
         asLinkResultType: ASLinkResultType,
-        downloadViewInfo: DownloadViewInfo
+        downloadViewInfo: DownloadViewInfo,
+        onSuccess: (() -> Unit)? = null
     ) {
         val taskResult =
             downloadTaskRepository.createDownloadTask(asLinkResultType, downloadViewInfo)
@@ -204,6 +205,7 @@ class DownloadManager(
 
         taskResult.onSuccess { taskTree ->
             processDownloadTree(taskTree, downloadViewInfo)
+            onSuccess?.invoke()
         }.onFailure { error ->
             throw error
         }
