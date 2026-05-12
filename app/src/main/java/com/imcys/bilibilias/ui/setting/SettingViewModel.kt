@@ -66,6 +66,12 @@ class SettingViewModel(
         }
     }
 
+    fun updateAutoBackAfterCreateDownload(enabled: Boolean) {
+        viewModelScope.launch {
+            appSettingsRepository.updateAutoBackAfterCreateDownload(enabled)
+        }
+    }
+
     suspend fun logout() {
         val user = biliUsersDao.getBILIUserByUid(usersDataSource.getUserId())
         user?.let {

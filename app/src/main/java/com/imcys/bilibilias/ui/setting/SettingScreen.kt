@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.outlined.AirplaneTicket
 import androidx.compose.material.icons.automirrored.outlined.ListAlt
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.Cloud
@@ -271,6 +272,18 @@ fun SettingScreen(
                     checked = appSettings.enabledClipboardAutoHandling,
                 ) { check ->
                     vm.updateClipboardAutoHandling(check)
+                }
+            }
+
+            item {
+                SwitchSettingsItem(
+                    imageVector = Icons.AutoMirrored.Outlined.Logout,
+                    text = "自动返回",
+                    description = "创建下载任务成功后自动返回上一页",
+                    checked = appSettings.enabledAutoBackAfterCreateDownload,
+                ) { check ->
+                    haptics.switchHapticFeedback(check)
+                    vm.updateAutoBackAfterCreateDownload(check)
                 }
             }
 

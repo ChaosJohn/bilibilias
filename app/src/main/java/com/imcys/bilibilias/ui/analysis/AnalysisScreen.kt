@@ -177,7 +177,9 @@ fun AnalysisScreen(
         uiState.asLinkResultType,
         uiState.downloadInfo,
         onDownload = {
-            vm.createDownloadTask(onSuccess = onToBack)
+            vm.createDownloadTask(
+                onSuccess = if (appSettings.enabledAutoBackAfterCreateDownload) onToBack else null
+            )
         },
         onToBack = onToBack
     ) {

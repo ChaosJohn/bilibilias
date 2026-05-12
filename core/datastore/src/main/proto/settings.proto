@@ -47,6 +47,9 @@ message AppSettings {
   // 视频解析平台
   optional VideoParsePlatform video_parse_platform = 16;
 
+  // 创建下载任务成功后自动返回
+  optional bool enabled_auto_back_after_create_download = 17;
+
 
   enum VideoParsePlatform{
     // Web
