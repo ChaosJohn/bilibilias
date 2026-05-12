@@ -159,10 +159,50 @@ fun AnalysisScreen(
     val episodeListMode = uiState.episodeListMode
     val appSettings by vm.appSettings.collectAsState(AppSettingsSerializer.appSettingsDefault)
     val windowsWidthSize = rememberWidthSizeClass()
+    var lastAutoDownloadKey by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(analysisRoute.asInputText) {
         // 解析分享内容
         vm.updateInputAsText(analysisRoute.asInputText)
+    }
+
+    LaunchedEffect(uiState.inputAsText) {
+        // 输入变化后允许新一轮自动下载触发
+        lastAutoDownloadKey = null
+    }
+
+    LaunchedEffect(
+        appSettings.enabledAutoDownloadAfterParseSuccess,
+        uiState.asLinkResultType,
+        uiState.downloadInfo,
+        uiState.isCreateDownloadLoading
+    ) {
+        if (!appSettings.enabledAutoDownloadAfterParseSuccess) return@LaunchedEffect
+        if (uiState.isCreateDownloadLoading) return@LaunchedEffect
+
+        val hasSelection = uiState.downloadInfo?.selectedCid?.isNotEmpty() == true ||
+                uiState.downloadInfo?.selectedEpId?.isNotEmpty() == true
+        if (!hasSelection) return@LaunchedEffect
+        if (uiState.asLinkResultType !is ASLinkResultType.BILI.Video && uiState.asLinkResultType !is ASLinkResultType.BILI.Donghua) {
+            return@LaunchedEffect
+        }
+
+        val autoDownloadKey = buildString {
+            append(uiState.inputAsText)
+            append("|")
+            append(uiState.asLinkResultType?.javaClass?.simpleName ?: "")
+            append("|")
+            append(uiState.downloadInfo?.selectedCid?.sorted()?.joinToString(",") ?: "")
+            append("|")
+            append(uiState.downloadInfo?.selectedEpId?.sorted()?.joinToString(",") ?: "")
+        }
+
+        if (lastAutoDownloadKey == autoDownloadKey) return@LaunchedEffect
+        lastAutoDownloadKey = autoDownloadKey
+
+        vm.createDownloadTask(
+            onSuccess = if (appSettings.enabledAutoBackAfterCreateDownload) onToBack else null
+        )
     }
 
     // 监听剪贴板

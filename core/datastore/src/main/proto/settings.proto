@@ -50,6 +50,9 @@ message AppSettings {
   // 创建下载任务成功后自动返回
   optional bool enabled_auto_back_after_create_download = 17;
 
+  // 解析成功后自动下载
+  optional bool enabled_auto_download_after_parse_success = 18;
+
 
   enum VideoParsePlatform{
     // Web

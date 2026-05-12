@@ -277,6 +277,18 @@ fun SettingScreen(
 
             item {
                 SwitchSettingsItem(
+                    imageVector = Icons.Outlined.Cloud,
+                    text = "自动下载",
+                    description = "开启后在解析成功时自动创建下载任务",
+                    checked = appSettings.enabledAutoDownloadAfterParseSuccess,
+                ) { check ->
+                    haptics.switchHapticFeedback(check)
+                    vm.updateAutoDownloadAfterParseSuccess(check)
+                }
+            }
+
+            item {
+                SwitchSettingsItem(
                     imageVector = Icons.AutoMirrored.Outlined.Logout,
                     text = "自动返回",
                     description = "创建下载任务成功后自动返回上一页",

@@ -72,6 +72,12 @@ class SettingViewModel(
         }
     }
 
+    fun updateAutoDownloadAfterParseSuccess(enabled: Boolean) {
+        viewModelScope.launch {
+            appSettingsRepository.updateAutoDownloadAfterParseSuccess(enabled)
+        }
+    }
+
     suspend fun logout() {
         val user = biliUsersDao.getBILIUserByUid(usersDataSource.getUserId())
         user?.let {

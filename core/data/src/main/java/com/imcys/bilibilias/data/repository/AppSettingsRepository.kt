@@ -76,6 +76,14 @@ class AppSettingsRepository(
         }
     }
 
+    suspend fun updateAutoDownloadAfterParseSuccess(enabled: Boolean) {
+        dataStore.updateData { currentSettings ->
+            currentSettings.copy {
+                enabledAutoDownloadAfterParseSuccess = enabled
+            }
+        }
+    }
+
     suspend fun updateLastSkipUpdateVersionCode(versionCode: Int) {
         dataStore.updateData { currentSettings ->
             currentSettings.toBuilder()
