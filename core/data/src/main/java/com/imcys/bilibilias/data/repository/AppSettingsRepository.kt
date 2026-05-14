@@ -15,6 +15,23 @@ class AppSettingsRepository(
 ) {
     private val TAG: String = "AppSettingsRepository"
 
+    private fun createDefaultVideoCodecPreferenceOrder() = listOf(
+        AppSettings.VideoCodecPreference.AV1,
+        AppSettings.VideoCodecPreference.H265,
+        AppSettings.VideoCodecPreference.H264,
+    )
+
+    private fun normalizeVideoCodecPreferenceOrder(order: List<AppSettings.VideoCodecPreference>): List<AppSettings.VideoCodecPreference> {
+        val defaults = createDefaultVideoCodecPreferenceOrder()
+        val normalized = order.distinct().filter { it in defaults }.toMutableList()
+        defaults.forEach { codec ->
+            if (codec !in normalized) {
+                normalized.add(codec)
+            }
+        }
+        return normalized
+    }
+
     val appSettingsFlow: Flow<AppSettings> = dataStore.data
 
 
@@ -81,6 +98,30 @@ class AppSettingsRepository(
             currentSettings.copy {
                 enabledAutoDownloadAfterParseSuccess = enabled
             }
+        }
+    }
+
+    suspend fun asyncVideoCodecPreferenceOrder(): List<AppSettings.VideoCodecPreference> {
+        val currentList = dataStore.data.first().videoCodecPreferenceOrderList
+        val normalizedList = normalizeVideoCodecPreferenceOrder(currentList)
+        if (currentList != normalizedList) {
+            dataStore.updateData { currentSettings ->
+                currentSettings.toBuilder()
+                    .clearVideoCodecPreferenceOrder()
+                    .addAllVideoCodecPreferenceOrder(normalizedList)
+                    .build()
+            }
+        }
+        return normalizedList
+    }
+
+    suspend fun updateVideoCodecPreferenceOrder(newList: List<AppSettings.VideoCodecPreference>) {
+        val normalizedList = normalizeVideoCodecPreferenceOrder(newList)
+        dataStore.updateData { currentSettings ->
+            currentSettings.toBuilder()
+                .clearVideoCodecPreferenceOrder()
+                .addAllVideoCodecPreferenceOrder(normalizedList)
+                .build()
         }
     }
 

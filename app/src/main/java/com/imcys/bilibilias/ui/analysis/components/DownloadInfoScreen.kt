@@ -31,11 +31,14 @@ import com.imcys.bilibilias.R
 import com.imcys.bilibilias.common.utils.toMenuVideoCode
 import com.imcys.bilibilias.common.utils.toVideoCode
 import com.imcys.bilibilias.data.model.download.DownloadViewInfo
+import com.imcys.bilibilias.datastore.AppSettings
 import com.imcys.bilibilias.network.ApiStatus
 import com.imcys.bilibilias.network.model.video.BILIVideoDash
 import com.imcys.bilibilias.network.model.video.BILIVideoDurls
 import com.imcys.bilibilias.network.model.video.BILIVideoSupportFormat
 import com.imcys.bilibilias.network.model.video.convertAudioQualityIdValue
+import com.imcys.bilibilias.ui.setting.codec.selectPreferredVideoCodec
+import com.imcys.bilibilias.ui.setting.codec.sortVideoCodecsByPreference
 import kotlin.collections.forEach
 
 /**
@@ -125,6 +128,7 @@ fun VideoSupportFormatsSelectScreen(
     mSupportFormats: List<BILIVideoSupportFormat>?,
     dashVideoList: List<BILIVideoDash.Video>?,
     durlVideoList: List<BILIVideoDurls>?,
+    codecPreferenceOrder: List<AppSettings.VideoCodecPreference>,
     onVideoQualityChange: (Long?) -> Unit = {},
     onVideoCodeChange: (String) -> Unit = {}
 ) {
@@ -136,43 +140,55 @@ fun VideoSupportFormatsSelectScreen(
     var selectVideoCodeValue: String by remember { mutableStateOf("") }
 
     var supportFormats by remember { mutableStateOf(listOf<BILIVideoSupportFormat>()) }
-    var videoCodingList by remember { mutableStateOf(setOf<String>()) }
+    var videoCodingList by remember { mutableStateOf(emptyList<String>()) }
 
     LaunchedEffect(downloadInfo?.selectVideoCode) {
         selectVideoCodeValue = downloadInfo?.selectVideoCode ?: ""
     }
 
-    LaunchedEffect(downloadInfo?.selectVideoQualityId) {
+    LaunchedEffect(
+        downloadInfo?.selectVideoQualityId,
+        mSupportFormats,
+        dashVideoList,
+        durlVideoList,
+        codecPreferenceOrder,
+    ) {
         supportFormats = if (dashVideoList != null) {
             // Dash模式
-            val mVideoCodingList = mutableSetOf<String>()
+            val availableVideoCodecs = linkedSetOf<String>()
             mSupportFormats?.filter {
                 // 筛选出支持的清晰度
                 it.quality == downloadInfo?.selectVideoQualityId
             }?.forEach {
-                if (it.codecs.isEmpty()){
+                if (it.codecs.isEmpty()) {
                     dashVideoList.forEach { video ->
                         val code = video.codecs.split(".")[0]
-                        if (code !in mVideoCodingList){
-                            mVideoCodingList.add(code)
+                        if (code !in availableVideoCodecs) {
+                            availableVideoCodecs.add(code)
                         }
                     }
                 } else {
                     it.codecs.forEach { code ->
-                        mVideoCodingList.add(code.split(".")[0])
+                        availableVideoCodecs.add(code.split(".")[0])
                     }
                 }
             }
-            videoCodingList = mVideoCodingList
-            // 更新视频编码选择，优先顺序：av01 -> h.265 -> h.264
-            val defaultCode = mVideoCodingList.firstOrNull { it == "av01" } ?: mVideoCodingList.firstOrNull { it != "avc1" } ?: mVideoCodingList.firstOrNull()
-            defaultCode?.let {
-                onVideoCodeChange(it)
+            videoCodingList = sortVideoCodecsByPreference(availableVideoCodecs, codecPreferenceOrder)
+            val nextCode = selectPreferredVideoCodec(videoCodingList, codecPreferenceOrder).orEmpty()
+            if (nextCode.isNotEmpty()) {
+                selectVideoCodeValue = nextCode
+                if (nextCode != downloadInfo?.selectVideoCode) {
+                    onVideoCodeChange(nextCode)
+                }
+            } else {
+                selectVideoCodeValue = ""
             }
             mSupportFormats?.filter { supportFormat ->
                 dashVideoList.any { item -> item.id == supportFormat.quality }
             } ?: emptyList()
         } else {
+            videoCodingList = emptyList()
+            selectVideoCodeValue = ""
             // FLV模式
             mSupportFormats?.filter { supportFormat ->
                 durlVideoList?.any { item -> item.quality == supportFormat.quality } == true

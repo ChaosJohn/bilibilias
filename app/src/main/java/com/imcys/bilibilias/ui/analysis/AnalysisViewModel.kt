@@ -35,12 +35,15 @@ import com.imcys.bilibilias.network.model.video.BILIVideoPlayerInfo
 import com.imcys.bilibilias.network.model.video.BILIVideoSupportFormat
 import com.imcys.bilibilias.network.model.video.SelectEpisodeType
 import com.imcys.bilibilias.network.service.AppAPIService
+import com.imcys.bilibilias.ui.setting.codec.normalizedVideoCodecPreferenceOrder
+import com.imcys.bilibilias.ui.setting.codec.selectPreferredVideoCodec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -517,7 +520,7 @@ class AnalysisViewModel(
         }
     }
 
-    private fun getDefaultDownloadInfoConfig(
+    private suspend fun getDefaultDownloadInfoConfig(
         dashVideoList: List<BILIVideoDash.Video>?,
         dashAudioList: List<BILIVideoDash.Audio>?,
         durlVideoList: List<BILIVideoDurls>?,
@@ -529,29 +532,12 @@ class AnalysisViewModel(
         ) -> Unit
     ) {
         val audioList = dashAudioList
-        var selectVideoCode = ""
+        val codecPreferenceOrder = appSettingsRepository.appSettingsFlow.first()
+            .normalizedVideoCodecPreferenceOrder()
         val supportFormats = if (dashVideoList != null) {
             // Dash模式
-            val mVideoCodingList = mutableSetOf<String>()
-            mSupportFormats?.forEach { format ->
-                if (format.codecs.isEmpty()){
-                    dashVideoList.forEach { video ->
-                        val code = video.codecs.split(".")[0]
-                        if (code !in mVideoCodingList){
-                            mVideoCodingList.add(code)
-                        }
-                    }
-                } else {
-                    format.codecs.forEach { code ->
-                        mVideoCodingList.add(code.split(".")[0])
-                    }
-                }
-            }
             mSupportFormats?.filter { supportFormat ->
                 dashVideoList.any { item -> item.id == supportFormat.quality }
-            }?.also {
-                // 选择支持清晰度的第一个视频编码
-                selectVideoCode = it.firstOrNull()?.codecs?.firstOrNull()?.split(".")[0] ?: ""
             }
         } else {
             // FLV模式
@@ -564,6 +550,29 @@ class AnalysisViewModel(
         }
         val selectVideoQualityId = supportFormats?.firstOrNull()?.run {
             quality
+        }
+        val selectVideoCode = if (dashVideoList != null && selectVideoQualityId != null) {
+            val availableVideoCodecs = linkedSetOf<String>()
+            mSupportFormats?.filter { format ->
+                format.quality == selectVideoQualityId
+            }?.forEach { format ->
+                if (format.codecs.isEmpty()) {
+                    dashVideoList.filter { video ->
+                        video.id == selectVideoQualityId
+                    }.forEach { video ->
+                        availableVideoCodecs.add(video.codecs.split(".")[0])
+                    }
+                } else {
+                    format.codecs.forEach { code ->
+                        availableVideoCodecs.add(code.split(".")[0])
+                    }
+                }
+            }
+            selectPreferredVideoCodec(availableVideoCodecs, codecPreferenceOrder)
+                ?: availableVideoCodecs.firstOrNull()
+                ?: ""
+        } else {
+            ""
         }
         val selectAudioQualityId = audioList?.firstOrNull()?.id ?: 0
         onFinish(selectVideoQualityId, selectVideoCode, selectAudioQualityId)

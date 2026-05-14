@@ -77,6 +77,7 @@ typealias OnUpdateSelectCidList = (List<Long>) -> Unit
 fun VideoDownloadScreen(
     downloadInfo: DownloadViewInfo?,
     videoPlayerInfo: NetWorkResult<BILIVideoPlayerInfo?>,
+    codecPreferenceOrder: List<AppSettings.VideoCodecPreference>,
     isSelectSingleModel: Boolean,
     episodeListMode: AppSettings.EpisodeListMode,
     currentBvId: String,
@@ -182,6 +183,7 @@ fun VideoDownloadScreen(
                         videoPlayerInfo.data?.supportFormats,
                         videoPlayerInfo.data?.dash?.video,
                         videoPlayerInfo.data?.durls,
+                        codecPreferenceOrder = codecPreferenceOrder,
                         onVideoQualityChange = onVideoQualityChange,
                         onVideoCodeChange = onVideoCodeChange
                     )

@@ -56,6 +56,8 @@ import com.imcys.bilibilias.ui.login.navigation.QRCodeLoginRoute
 import com.imcys.bilibilias.ui.setting.SettingScreen
 import com.imcys.bilibilias.ui.setting.about.AboutRouter
 import com.imcys.bilibilias.ui.setting.about.AboutScreen
+import com.imcys.bilibilias.ui.setting.codec.VideoCodecPreferenceRoute
+import com.imcys.bilibilias.ui.setting.codec.VideoCodecPreferenceScreen
 import com.imcys.bilibilias.ui.setting.complaint.ComplaintRoute
 import com.imcys.bilibilias.ui.setting.complaint.ComplaintScreen
 import com.imcys.bilibilias.ui.setting.contract.NamingConventionRoute
@@ -296,6 +298,9 @@ fun BILIBILAISNavDisplay() {
                         onToRoam = {
                             backStack.addWithReuse(RoamRoute)
                         },
+                        onToVideoCodecPreference = {
+                            backStack.addWithReuse(VideoCodecPreferenceRoute)
+                        },
                         onToBack = { backStack.removeLastOrNullSafe() },
                         onToComplaint = { backStack.addWithReuse(ComplaintRoute) },
                         onToLayoutTypeset = { backStack.addWithReuse(LayoutTypesetRoute) },
@@ -378,6 +383,14 @@ fun BILIBILAISNavDisplay() {
                 ) {
                     LayoutTypesetScreen(
                         layoutTypesetRoute = it,
+                        onToBack = { backStack.removeLastOrNullSafe() }
+                    )
+                }
+                entry<VideoCodecPreferenceRoute>(
+                    metadata = ListDetailSceneStrategy.detailPane()
+                ) {
+                    VideoCodecPreferenceScreen(
+                        route = it,
                         onToBack = { backStack.removeLastOrNullSafe() }
                     )
                 }

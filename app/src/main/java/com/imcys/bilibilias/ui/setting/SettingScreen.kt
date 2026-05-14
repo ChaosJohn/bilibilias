@@ -85,7 +85,8 @@ fun SettingScreenPreview() {
         onToRoam = {},
         onToBack = {},
         onToComplaint = {},
-        onToLayoutTypeset = {})
+        onToLayoutTypeset = {},
+        onToVideoCodecPreference = {})
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -94,6 +95,7 @@ fun SettingScreen(
     onToRoam: () -> Unit,
     onToComplaint: () -> Unit,
     onToLayoutTypeset: () -> Unit,
+    onToVideoCodecPreference: () -> Unit,
     onToBack: () -> Unit,
     onToAbout: () -> Unit = {},
     onToVersionInfo: () -> Unit = {},
@@ -285,6 +287,15 @@ fun SettingScreen(
                     haptics.switchHapticFeedback(check)
                     vm.updateAutoDownloadAfterParseSuccess(check)
                 }
+            }
+
+            item {
+                BaseSettingsItem(
+                    painter = rememberVectorPainter(Icons.Outlined.Edit),
+                    text = "视频编码格式首选项",
+                    descriptionText = "拖动调整 av01、h.264、h.265 的默认优先级",
+                    onClick = onToVideoCodecPreference
+                )
             }
 
             item {

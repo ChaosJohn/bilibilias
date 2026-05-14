@@ -121,6 +121,7 @@ import com.imcys.bilibilias.network.model.video.SelectEpisodeType
 import com.imcys.bilibilias.ui.analysis.components.DongmhuaDownloadScreen
 import com.imcys.bilibilias.ui.analysis.components.VideoDownloadScreen
 import com.imcys.bilibilias.ui.analysis.navigation.AnalysisRoute
+import com.imcys.bilibilias.ui.setting.codec.normalizedVideoCodecPreferenceOrder
 import com.imcys.bilibilias.ui.utils.rememberWidthSizeClass
 import com.imcys.bilibilias.ui.weight.ASAlertDialog
 import com.imcys.bilibilias.ui.weight.ASAsyncImage
@@ -1522,6 +1523,8 @@ private fun AnalysisDownloadConfigContent(
     val currentUserInfo by viewModel.currentUserInfo.collectAsState()
     val interactiveVideo by viewModel.interactiveVideo.collectAsState()
     val boostVideoInfo by viewModel.boostVideoInfo.collectAsState()
+    val appSettings by viewModel.appSettings.collectAsState(AppSettingsSerializer.appSettingsDefault)
+    val codecPreferenceOrder = appSettings.normalizedVideoCodecPreferenceOrder()
 
     when (asLinkResultType) {
         is ASLinkResultType.BILI.Donghua -> {
@@ -1529,6 +1532,7 @@ private fun AnalysisDownloadConfigContent(
                 downloadInfo,
                 donghuaPlayerInfo,
                 currentUserInfo,
+                codecPreferenceOrder,
                 isSelectSingleModel,
                 episodeListMode,
                 asLinkResultType.currentEpId,
@@ -1588,6 +1592,7 @@ private fun AnalysisDownloadConfigContent(
             VideoDownloadScreen(
                 downloadInfo,
                 videoPlayerInfo,
+                codecPreferenceOrder,
                 isSelectSingleModel,
                 episodeListMode,
                 asLinkResultType.currentBvId,

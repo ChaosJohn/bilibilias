@@ -61,6 +61,7 @@ fun DongmhuaDownloadScreen(
     downloadInfo: DownloadViewInfo?,
     donghuaPlayerInfo: NetWorkResult<BILIDonghuaPlayerInfo?>,
     currentUserInfo: BILIUsersEntity?,
+    codecPreferenceOrder: List<AppSettings.VideoCodecPreference>,
     isSelectSingleModel: Boolean,
     episodeListMode: AppSettings.EpisodeListMode,
     currentEpId: Long,
@@ -140,6 +141,7 @@ fun DongmhuaDownloadScreen(
                         donghuaPlayerInfo.data?.supportFormats,
                         donghuaPlayerInfo.data?.dash?.video,
                         donghuaPlayerInfo.data?.durls,
+                        codecPreferenceOrder = codecPreferenceOrder,
                         onVideoQualityChange = onVideoQualityChange,
                         onVideoCodeChange = onVideoCodeChange
                     )

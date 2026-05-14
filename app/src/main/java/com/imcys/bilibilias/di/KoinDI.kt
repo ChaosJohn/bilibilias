@@ -12,6 +12,7 @@ import com.imcys.bilibilias.ui.home.HomeViewModel
 import com.imcys.bilibilias.ui.login.CookieLoginViewModel
 import com.imcys.bilibilias.ui.login.QRCodeLoginViewModel
 import com.imcys.bilibilias.ui.setting.SettingViewModel
+import com.imcys.bilibilias.ui.setting.codec.VideoCodecPreferenceViewModel
 import com.imcys.bilibilias.ui.setting.contract.NamingConventionViewModel
 import com.imcys.bilibilias.ui.setting.developer.LineConfigViewModel
 import com.imcys.bilibilias.ui.setting.layout.LayoutTypesetViewModel
@@ -48,6 +49,7 @@ val appModule = module {
     viewModel { UserFolderViewModel(get()) }
     viewModel { LikeVideoViewModel(get()) }
     viewModel { SettingViewModel(get(),get(),get(),get(),get(),get()) }
+    viewModel { VideoCodecPreferenceViewModel(get()) }
     viewModel { LayoutTypesetViewModel(get()) }
     viewModel { UserPlayHistoryViewModel(get()) }
     viewModel { FrameExtractorViewModel(get(), get(), get()) }

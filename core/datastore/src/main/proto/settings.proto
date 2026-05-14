@@ -53,6 +53,9 @@ message AppSettings {
   // 解析成功后自动下载
   optional bool enabled_auto_download_after_parse_success = 18;
 
+  // 视频编码格式优先级
+  repeated VideoCodecPreference video_codec_preference_order = 19;
+
 
   enum VideoParsePlatform{
     // Web
@@ -61,6 +64,12 @@ message AppSettings {
     TV = 1;
     // 手机
     Mobile = 2;
+  }
+
+  enum VideoCodecPreference {
+    AV1 = 0;
+    H264 = 1;
+    H265 = 2;
   }
 
 

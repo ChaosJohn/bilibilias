@@ -19,12 +19,19 @@ val Context.userAppSettingsStore: DataStore<AppSettings> by dataStore(
  */
 object AppSettingsSerializer : Serializer<AppSettings> {
 
+    private val defaultVideoCodecPreferenceOrder = listOf(
+        AppSettings.VideoCodecPreference.AV1,
+        AppSettings.VideoCodecPreference.H265,
+        AppSettings.VideoCodecPreference.H264,
+    )
+
     val appSettingsDefault = AppSettings.getDefaultInstance().toBuilder()
         .setVideoNamingRule("{p_title}")
         .setBangumiNamingRule("{episode_title}")
         .addAllUseToolHistory(listOf("WebParser","FrameExtractor"))
         .setEnabledClipboardAutoHandling(true)
         .setVideoParsePlatform(AppSettings.VideoParsePlatform.Web)
+        .addAllVideoCodecPreferenceOrder(defaultVideoCodecPreferenceOrder)
         .build()
 
 
@@ -53,6 +60,10 @@ object AppSettingsSerializer : Serializer<AppSettings> {
             }
             if (!parsed.hasVideoParsePlatform()){
                 builder.setVideoParsePlatform(defaultValue.videoParsePlatform)
+                modified = true
+            }
+            if (parsed.videoCodecPreferenceOrderList.isEmpty()) {
+                builder.addAllVideoCodecPreferenceOrder(defaultValue.videoCodecPreferenceOrderList)
                 modified = true
             }
             return if (modified) builder.build() else parsed
