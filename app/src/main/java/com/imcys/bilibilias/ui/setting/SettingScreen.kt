@@ -86,7 +86,10 @@ fun SettingScreenPreview() {
         onToBack = {},
         onToComplaint = {},
         onToLayoutTypeset = {},
-        onToVideoCodecPreference = {})
+        onToVideoCodecPreference = {},
+        onToVideoQualityPreference = {},
+        onToAudioQualityPreference = {},
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -96,6 +99,8 @@ fun SettingScreen(
     onToComplaint: () -> Unit,
     onToLayoutTypeset: () -> Unit,
     onToVideoCodecPreference: () -> Unit,
+    onToVideoQualityPreference: () -> Unit,
+    onToAudioQualityPreference: () -> Unit,
     onToBack: () -> Unit,
     onToAbout: () -> Unit = {},
     onToVersionInfo: () -> Unit = {},
@@ -295,6 +300,24 @@ fun SettingScreen(
                     text = "视频编码格式首选项",
                     descriptionText = "拖动调整 av01、h.264、h.265 的默认优先级",
                     onClick = onToVideoCodecPreference
+                )
+            }
+
+            item {
+                BaseSettingsItem(
+                    painter = rememberVectorPainter(Icons.Outlined.Edit),
+                    text = "视频质量首选项",
+                    descriptionText = "拖动调整默认清晰度优先级",
+                    onClick = onToVideoQualityPreference
+                )
+            }
+
+            item {
+                BaseSettingsItem(
+                    painter = rememberVectorPainter(Icons.Outlined.Edit),
+                    text = "音频质量首选项",
+                    descriptionText = "拖动调整默认音质优先级",
+                    onClick = onToAudioQualityPreference
                 )
             }
 

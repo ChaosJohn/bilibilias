@@ -70,6 +70,10 @@ import com.imcys.bilibilias.ui.setting.layout.LayoutTypesetRoute
 import com.imcys.bilibilias.ui.setting.layout.LayoutTypesetScreen
 import com.imcys.bilibilias.ui.setting.navigation.RoamRoute
 import com.imcys.bilibilias.ui.setting.navigation.SettingRoute
+import com.imcys.bilibilias.ui.setting.quality.AudioQualityPreferenceRoute
+import com.imcys.bilibilias.ui.setting.quality.AudioQualityPreferenceScreen
+import com.imcys.bilibilias.ui.setting.quality.VideoQualityPreferenceRoute
+import com.imcys.bilibilias.ui.setting.quality.VideoQualityPreferenceScreen
 import com.imcys.bilibilias.ui.setting.roam.RoamScreen
 import com.imcys.bilibilias.ui.setting.storage.StorageManagementRoute
 import com.imcys.bilibilias.ui.setting.storage.StorageManagementScreen
@@ -301,6 +305,12 @@ fun BILIBILAISNavDisplay() {
                         onToVideoCodecPreference = {
                             backStack.addWithReuse(VideoCodecPreferenceRoute)
                         },
+                        onToVideoQualityPreference = {
+                            backStack.addWithReuse(VideoQualityPreferenceRoute)
+                        },
+                        onToAudioQualityPreference = {
+                            backStack.addWithReuse(AudioQualityPreferenceRoute)
+                        },
                         onToBack = { backStack.removeLastOrNullSafe() },
                         onToComplaint = { backStack.addWithReuse(ComplaintRoute) },
                         onToLayoutTypeset = { backStack.addWithReuse(LayoutTypesetRoute) },
@@ -390,6 +400,22 @@ fun BILIBILAISNavDisplay() {
                     metadata = ListDetailSceneStrategy.detailPane()
                 ) {
                     VideoCodecPreferenceScreen(
+                        route = it,
+                        onToBack = { backStack.removeLastOrNullSafe() }
+                    )
+                }
+                entry<VideoQualityPreferenceRoute>(
+                    metadata = ListDetailSceneStrategy.detailPane()
+                ) {
+                    VideoQualityPreferenceScreen(
+                        route = it,
+                        onToBack = { backStack.removeLastOrNullSafe() }
+                    )
+                }
+                entry<AudioQualityPreferenceRoute>(
+                    metadata = ListDetailSceneStrategy.detailPane()
+                ) {
+                    AudioQualityPreferenceScreen(
                         route = it,
                         onToBack = { backStack.removeLastOrNullSafe() }
                     )

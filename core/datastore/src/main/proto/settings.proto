@@ -56,6 +56,12 @@ message AppSettings {
   // 视频编码格式优先级
   repeated VideoCodecPreference video_codec_preference_order = 19;
 
+  // 视频清晰度优先级（质量ID）
+  repeated int64 video_quality_preference_order = 20;
+
+  // 音频清晰度优先级（质量ID）
+  repeated int64 audio_quality_preference_order = 21;
+
 
   enum VideoParsePlatform{
     // Web

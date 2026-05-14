@@ -16,6 +16,8 @@ import com.imcys.bilibilias.ui.setting.codec.VideoCodecPreferenceViewModel
 import com.imcys.bilibilias.ui.setting.contract.NamingConventionViewModel
 import com.imcys.bilibilias.ui.setting.developer.LineConfigViewModel
 import com.imcys.bilibilias.ui.setting.layout.LayoutTypesetViewModel
+import com.imcys.bilibilias.ui.setting.quality.AudioQualityPreferenceViewModel
+import com.imcys.bilibilias.ui.setting.quality.VideoQualityPreferenceViewModel
 import com.imcys.bilibilias.ui.setting.roam.RoamViewModel
 import com.imcys.bilibilias.ui.setting.storage.StorageManagementViewModel
 import com.imcys.bilibilias.ui.tools.donate.DonateViewModel
@@ -50,6 +52,8 @@ val appModule = module {
     viewModel { LikeVideoViewModel(get()) }
     viewModel { SettingViewModel(get(),get(),get(),get(),get(),get()) }
     viewModel { VideoCodecPreferenceViewModel(get()) }
+    viewModel { VideoQualityPreferenceViewModel(get()) }
+    viewModel { AudioQualityPreferenceViewModel(get()) }
     viewModel { LayoutTypesetViewModel(get()) }
     viewModel { UserPlayHistoryViewModel(get()) }
     viewModel { FrameExtractorViewModel(get(), get(), get()) }

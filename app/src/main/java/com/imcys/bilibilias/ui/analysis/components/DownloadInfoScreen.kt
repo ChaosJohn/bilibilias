@@ -39,6 +39,10 @@ import com.imcys.bilibilias.network.model.video.BILIVideoSupportFormat
 import com.imcys.bilibilias.network.model.video.convertAudioQualityIdValue
 import com.imcys.bilibilias.ui.setting.codec.selectPreferredVideoCodec
 import com.imcys.bilibilias.ui.setting.codec.sortVideoCodecsByPreference
+import com.imcys.bilibilias.ui.setting.quality.selectPreferredAudioQuality
+import com.imcys.bilibilias.ui.setting.quality.selectPreferredVideoQuality
+import com.imcys.bilibilias.ui.setting.quality.sortAudioQualitiesByPreference
+import com.imcys.bilibilias.ui.setting.quality.sortVideoQualitiesByPreference
 import kotlin.collections.forEach
 
 /**
@@ -51,6 +55,7 @@ fun AudioQualitySelectScreen(
     downloadInfo: DownloadViewInfo?,
     apiStatus: ApiStatus,
     audioList: List<BILIVideoDash.Audio>?,
+    audioQualityPreferenceOrder: List<Long>,
     onAudioQualityChange: (Long?) -> Unit = {}
 ) {
     var modelExpanded by remember { mutableStateOf(false) }
@@ -58,6 +63,26 @@ fun AudioQualitySelectScreen(
 
     LaunchedEffect(downloadInfo?.selectAudioQualityId) {
         selectValue = downloadInfo?.selectAudioQualityId ?: 0
+    }
+
+    val sortedAudioList = remember(audioList, audioQualityPreferenceOrder) {
+        val availableIds = audioList?.map { it.id } ?: emptyList()
+        val sortedIds = sortAudioQualitiesByPreference(availableIds, audioQualityPreferenceOrder)
+        sortedIds.mapNotNull { qualityId ->
+            audioList?.firstOrNull { it.id == qualityId }
+        }
+    }
+
+    LaunchedEffect(sortedAudioList, audioQualityPreferenceOrder) {
+        if (sortedAudioList.isEmpty()) return@LaunchedEffect
+        val preferredAudio = selectPreferredAudioQuality(
+            availableQualityIds = sortedAudioList.map { it.id },
+            preferenceOrder = audioQualityPreferenceOrder,
+        ) ?: return@LaunchedEffect
+        if (downloadInfo?.selectAudioQualityId != preferredAudio) {
+            selectValue = preferredAudio
+            onAudioQualityChange(preferredAudio)
+        }
     }
 
     if (apiStatus == ApiStatus.ERROR) { return }
@@ -96,7 +121,7 @@ fun AudioQualitySelectScreen(
                 onDismissRequest = { modelExpanded = false },
                 shape = CardDefaults.shape
             ) {
-                audioList?.forEach {
+                sortedAudioList.forEach {
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -129,6 +154,7 @@ fun VideoSupportFormatsSelectScreen(
     dashVideoList: List<BILIVideoDash.Video>?,
     durlVideoList: List<BILIVideoDurls>?,
     codecPreferenceOrder: List<AppSettings.VideoCodecPreference>,
+    videoQualityPreferenceOrder: List<Long>,
     onVideoQualityChange: (Long?) -> Unit = {},
     onVideoCodeChange: (String) -> Unit = {}
 ) {
@@ -183,19 +209,55 @@ fun VideoSupportFormatsSelectScreen(
             } else {
                 selectVideoCodeValue = ""
             }
-            mSupportFormats?.filter { supportFormat ->
+            val rawSupportFormats = mSupportFormats?.filter { supportFormat ->
                 dashVideoList.any { item -> item.id == supportFormat.quality }
             } ?: emptyList()
+            val sortedQualityIds = sortVideoQualitiesByPreference(
+                availableQualityIds = rawSupportFormats.map { it.quality },
+                preferenceOrder = videoQualityPreferenceOrder,
+            )
+            val sortedSupportFormats = sortedQualityIds.mapNotNull { qualityId ->
+                rawSupportFormats.firstOrNull { it.quality == qualityId }
+            }
+
+            val preferredQuality = selectPreferredVideoQuality(
+                availableQualityIds = sortedSupportFormats.map { it.quality },
+                preferenceOrder = videoQualityPreferenceOrder,
+            )
+            val selectedQuality = downloadInfo?.selectVideoQualityId
+            if (preferredQuality != null && selectedQuality !in sortedSupportFormats.map { it.quality }) {
+                onVideoQualityChange(preferredQuality)
+            }
+
+            sortedSupportFormats
         } else {
             videoCodingList = emptyList()
             selectVideoCodeValue = ""
             // FLV模式
-            mSupportFormats?.filter { supportFormat ->
+            val rawSupportFormats = mSupportFormats?.filter { supportFormat ->
                 durlVideoList?.any { item -> item.quality == supportFormat.quality } == true
             }?.ifEmpty {
                 // 充电视频下有可能找不到对应的清晰度
                 mSupportFormats
             } ?: emptyList()
+            val sortedQualityIds = sortVideoQualitiesByPreference(
+                availableQualityIds = rawSupportFormats.map { it.quality },
+                preferenceOrder = videoQualityPreferenceOrder,
+            )
+            val sortedSupportFormats = sortedQualityIds.mapNotNull { qualityId ->
+                rawSupportFormats.firstOrNull { it.quality == qualityId }
+            }
+
+            val preferredQuality = selectPreferredVideoQuality(
+                availableQualityIds = sortedSupportFormats.map { it.quality },
+                preferenceOrder = videoQualityPreferenceOrder,
+            )
+            val selectedQuality = downloadInfo?.selectVideoQualityId
+            if (preferredQuality != null && selectedQuality !in sortedSupportFormats.map { it.quality }) {
+                onVideoQualityChange(preferredQuality)
+            }
+
+            sortedSupportFormats
         }
         selectVideoFormatValue = supportFormats.firstOrNull {
             it.quality == downloadInfo?.selectVideoQualityId

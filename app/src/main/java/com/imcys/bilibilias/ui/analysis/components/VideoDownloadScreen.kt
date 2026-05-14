@@ -78,6 +78,8 @@ fun VideoDownloadScreen(
     downloadInfo: DownloadViewInfo?,
     videoPlayerInfo: NetWorkResult<BILIVideoPlayerInfo?>,
     codecPreferenceOrder: List<AppSettings.VideoCodecPreference>,
+    videoQualityPreferenceOrder: List<Long>,
+    audioQualityPreferenceOrder: List<Long>,
     isSelectSingleModel: Boolean,
     episodeListMode: AppSettings.EpisodeListMode,
     currentBvId: String,
@@ -184,6 +186,7 @@ fun VideoDownloadScreen(
                         videoPlayerInfo.data?.dash?.video,
                         videoPlayerInfo.data?.durls,
                         codecPreferenceOrder = codecPreferenceOrder,
+                        videoQualityPreferenceOrder = videoQualityPreferenceOrder,
                         onVideoQualityChange = onVideoQualityChange,
                         onVideoCodeChange = onVideoCodeChange
                     )
@@ -196,6 +199,7 @@ fun VideoDownloadScreen(
                         downloadInfo,
                         videoPlayerInfo.status,
                         videoPlayerInfo.data?.dash?.audio,
+                        audioQualityPreferenceOrder = audioQualityPreferenceOrder,
                         onAudioQualityChange = onAudioQualityChange
                     )
                 }

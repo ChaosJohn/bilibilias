@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +61,8 @@ fun DongmhuaDownloadScreen(
     donghuaPlayerInfo: NetWorkResult<BILIDonghuaPlayerInfo?>,
     currentUserInfo: BILIUsersEntity?,
     codecPreferenceOrder: List<AppSettings.VideoCodecPreference>,
+    videoQualityPreferenceOrder: List<Long>,
+    audioQualityPreferenceOrder: List<Long>,
     isSelectSingleModel: Boolean,
     episodeListMode: AppSettings.EpisodeListMode,
     currentEpId: Long,
@@ -85,7 +86,6 @@ fun DongmhuaDownloadScreen(
     }
 
     val isVip = currentUserInfo?.isVip() == true
-    val haptics = LocalHapticFeedback.current
 
     LaunchedEffect(donghuaViewInfo.data?.seasonId, donghuaViewInfo.data?.seasons) {
         selectSeasonsId = donghuaViewInfo.data?.seasons
@@ -142,6 +142,7 @@ fun DongmhuaDownloadScreen(
                         donghuaPlayerInfo.data?.dash?.video,
                         donghuaPlayerInfo.data?.durls,
                         codecPreferenceOrder = codecPreferenceOrder,
+                        videoQualityPreferenceOrder = videoQualityPreferenceOrder,
                         onVideoQualityChange = onVideoQualityChange,
                         onVideoCodeChange = onVideoCodeChange
                     )
@@ -154,6 +155,7 @@ fun DongmhuaDownloadScreen(
                         downloadInfo,
                         donghuaPlayerInfo.status,
                         donghuaPlayerInfo.data?.dash?.audio,
+                        audioQualityPreferenceOrder = audioQualityPreferenceOrder,
                         onAudioQualityChange = onAudioQualityChange
                     )
                 }

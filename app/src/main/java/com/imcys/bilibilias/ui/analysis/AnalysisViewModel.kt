@@ -37,6 +37,11 @@ import com.imcys.bilibilias.network.model.video.SelectEpisodeType
 import com.imcys.bilibilias.network.service.AppAPIService
 import com.imcys.bilibilias.ui.setting.codec.normalizedVideoCodecPreferenceOrder
 import com.imcys.bilibilias.ui.setting.codec.selectPreferredVideoCodec
+import com.imcys.bilibilias.ui.setting.quality.normalizedAudioQualityPreferenceOrder
+import com.imcys.bilibilias.ui.setting.quality.normalizedVideoQualityPreferenceOrder
+import com.imcys.bilibilias.ui.setting.quality.selectPreferredAudioQuality
+import com.imcys.bilibilias.ui.setting.quality.selectPreferredVideoQuality
+import com.imcys.bilibilias.ui.setting.quality.sortVideoQualitiesByPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -532,8 +537,10 @@ class AnalysisViewModel(
         ) -> Unit
     ) {
         val audioList = dashAudioList
-        val codecPreferenceOrder = appSettingsRepository.appSettingsFlow.first()
-            .normalizedVideoCodecPreferenceOrder()
+        val settings = appSettingsRepository.appSettingsFlow.first()
+        val codecPreferenceOrder = settings.normalizedVideoCodecPreferenceOrder()
+        val videoQualityPreferenceOrder = settings.normalizedVideoQualityPreferenceOrder()
+        val audioQualityPreferenceOrder = settings.normalizedAudioQualityPreferenceOrder()
         val supportFormats = if (dashVideoList != null) {
             // Dash模式
             mSupportFormats?.filter { supportFormat ->
@@ -548,9 +555,14 @@ class AnalysisViewModel(
                 mSupportFormats
             }
         }
-        val selectVideoQualityId = supportFormats?.firstOrNull()?.run {
-            quality
-        }
+        val sortedVideoQualityIds = sortVideoQualitiesByPreference(
+            availableQualityIds = supportFormats?.map { it.quality } ?: emptyList(),
+            preferenceOrder = videoQualityPreferenceOrder,
+        )
+        val selectVideoQualityId = selectPreferredVideoQuality(
+            availableQualityIds = sortedVideoQualityIds,
+            preferenceOrder = videoQualityPreferenceOrder,
+        )
         val selectVideoCode = if (dashVideoList != null && selectVideoQualityId != null) {
             val availableVideoCodecs = linkedSetOf<String>()
             mSupportFormats?.filter { format ->
@@ -574,7 +586,10 @@ class AnalysisViewModel(
         } else {
             ""
         }
-        val selectAudioQualityId = audioList?.firstOrNull()?.id ?: 0
+        val selectAudioQualityId = selectPreferredAudioQuality(
+            availableQualityIds = audioList?.map { it.id } ?: emptyList(),
+            preferenceOrder = audioQualityPreferenceOrder,
+        ) ?: 0
         onFinish(selectVideoQualityId, selectVideoCode, selectAudioQualityId)
     }
 

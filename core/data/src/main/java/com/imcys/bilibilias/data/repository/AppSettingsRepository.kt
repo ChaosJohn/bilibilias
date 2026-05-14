@@ -32,6 +32,40 @@ class AppSettingsRepository(
         return normalized
     }
 
+    private fun createDefaultVideoQualityPreferenceOrder() = listOf(
+        127L,
+        126L,
+        125L,
+        120L,
+        116L,
+        112L,
+        100L,
+        80L,
+        74L,
+        64L,
+        32L,
+        16L,
+        6L,
+    )
+
+    private fun createDefaultAudioQualityPreferenceOrder() = listOf(
+        30251L,
+        30250L,
+        30280L,
+        30232L,
+        30216L,
+    )
+
+    private fun normalizeQualityPreferenceOrder(order: List<Long>, defaults: List<Long>): List<Long> {
+        val normalized = order.distinct().filter { it in defaults }.toMutableList()
+        defaults.forEach { qualityId ->
+            if (qualityId !in normalized) {
+                normalized.add(qualityId)
+            }
+        }
+        return normalized
+    }
+
     val appSettingsFlow: Flow<AppSettings> = dataStore.data
 
 
@@ -121,6 +155,66 @@ class AppSettingsRepository(
             currentSettings.toBuilder()
                 .clearVideoCodecPreferenceOrder()
                 .addAllVideoCodecPreferenceOrder(normalizedList)
+                .build()
+        }
+    }
+
+    suspend fun asyncVideoQualityPreferenceOrder(): List<Long> {
+        val currentList = dataStore.data.first().videoQualityPreferenceOrderList
+        val normalizedList = normalizeQualityPreferenceOrder(
+            order = currentList,
+            defaults = createDefaultVideoQualityPreferenceOrder(),
+        )
+        if (currentList != normalizedList) {
+            dataStore.updateData { currentSettings ->
+                currentSettings.toBuilder()
+                    .clearVideoQualityPreferenceOrder()
+                    .addAllVideoQualityPreferenceOrder(normalizedList)
+                    .build()
+            }
+        }
+        return normalizedList
+    }
+
+    suspend fun updateVideoQualityPreferenceOrder(newList: List<Long>) {
+        val normalizedList = normalizeQualityPreferenceOrder(
+            order = newList,
+            defaults = createDefaultVideoQualityPreferenceOrder(),
+        )
+        dataStore.updateData { currentSettings ->
+            currentSettings.toBuilder()
+                .clearVideoQualityPreferenceOrder()
+                .addAllVideoQualityPreferenceOrder(normalizedList)
+                .build()
+        }
+    }
+
+    suspend fun asyncAudioQualityPreferenceOrder(): List<Long> {
+        val currentList = dataStore.data.first().audioQualityPreferenceOrderList
+        val normalizedList = normalizeQualityPreferenceOrder(
+            order = currentList,
+            defaults = createDefaultAudioQualityPreferenceOrder(),
+        )
+        if (currentList != normalizedList) {
+            dataStore.updateData { currentSettings ->
+                currentSettings.toBuilder()
+                    .clearAudioQualityPreferenceOrder()
+                    .addAllAudioQualityPreferenceOrder(normalizedList)
+                    .build()
+            }
+        }
+        return normalizedList
+    }
+
+    suspend fun updateAudioQualityPreferenceOrder(newList: List<Long>) {
+        val normalizedList = normalizeQualityPreferenceOrder(
+            order = newList,
+            defaults = createDefaultAudioQualityPreferenceOrder(),
+        )
+        dataStore.updateData { currentSettings ->
+            currentSettings.toBuilder()
+                .clearAudioQualityPreferenceOrder()
+                .addAllAudioQualityPreferenceOrder(normalizedList)
                 .build()
         }
     }
