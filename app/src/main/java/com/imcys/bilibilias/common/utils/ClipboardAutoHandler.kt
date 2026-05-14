@@ -5,15 +5,15 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.ui.platform.LocalView
 import com.imcys.bilibilias.datastore.AppSettings
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 private const val CLIPBOARD_READ_DELAY_MS = 180L
 
@@ -27,22 +27,30 @@ fun ClipboardAutoHandler(
     onClipboardText: (String) -> Unit,
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val view = LocalView.current
+    val coroutineScope = rememberCoroutineScope()
 
     val enabledState by rememberUpdatedState(appSettings.enabledClipboardAutoHandling)
     val shouldHandleState by rememberUpdatedState(shouldHandleClipboard)
     val onClipboardTextState by rememberUpdatedState(onClipboardText)
 
-    if (!enabledState || !shouldHandleState()) return
-
-    LaunchedEffect(lifecycleOwner, shouldHandleState) {
-        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            Log.d("TAG", "ClipboardAutoHandler: RESUMED")
-            delay(CLIPBOARD_READ_DELAY_MS)
-            val text = context.consumeClipboardText()
-            if (!text.isNullOrEmpty()) {
-                onClipboardTextState(text)
+    DisposableEffect(view) {
+        val listener = android.view.ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+            if (hasFocus && enabledState && shouldHandleState()) {
+                coroutineScope.launch {
+                    Log.d("TAG", "ClipboardAutoHandler: WINDOW_FOCUS_GAINED")
+                    delay(CLIPBOARD_READ_DELAY_MS)
+                    val text = context.consumeClipboardText()
+                    if (!text.isNullOrEmpty()) {
+                        onClipboardTextState(text)
+                    }
+                }
             }
+        }
+
+        view.viewTreeObserver.addOnWindowFocusChangeListener(listener)
+        onDispose {
+            view.viewTreeObserver.removeOnWindowFocusChangeListener(listener)
         }
     }
 }
