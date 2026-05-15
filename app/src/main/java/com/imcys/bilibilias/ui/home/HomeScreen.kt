@@ -342,12 +342,12 @@ private fun HomeContent(
     var bulletinDialogShow by remember { mutableStateOf(false) }
     var unknownAppSign by remember { mutableStateOf(false) }
 
-    val currentSHA1 = rememberSignatureSHA1(context)
-    LaunchedEffect(currentSHA1) {
-        if (currentSHA1 == null || !FFmpegManger.checkSign(currentSHA1)) {
-            unknownAppSign = true
-        }
-    }
+//    val currentSHA1 = rememberSignatureSHA1(context)
+//    LaunchedEffect(currentSHA1) {
+//        if (currentSHA1 == null || !FFmpegManger.checkSign(currentSHA1)) {
+//            unknownAppSign = true
+//        }
+//    }
 
     LaunchedEffect(Unit) {
         vm.initOldAppInfo(context)
